@@ -1,3 +1,7 @@
+// to run this file
+// npm install
+// node main.js
+
 const { google } = require('googleapis')
 require('dotenv').config()
 
@@ -26,27 +30,32 @@ const auth = new google.auth.GoogleAuth({
   scopes: SCOPES,
 })
 
-const listCalendarEvents = () => {
+const now = new Date()
+const oneWeekLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+
+const listCalendarEvents = (startTime, endTime) => {
   calendar.events.list(
     {
       auth: auth,
       calendarId: GOOGLE_CALENDAR_ID,
-      timeMin: new Date().toISOString(),
+      timeMin: startTime.toISOString(),
+      timeMax: endTime.toISOString(),
       maxResults: 10,
       singleEvents: true,
       orderBy: 'startTime',
     },
     (error, result) => {
       if (error) {
-        console.log('Something went wrong: ', error) // If there is an error, log it to the console
+        console.log('Something went wrong: ', error)
       } else {
         if (result.data.items.length > 0) {
-          console.log('List of upcoming events: ', result.data.items) // If there are events, print them out
+          console.log('List of upcoming events: ', result.data.items)
         } else {
-          console.log('No upcoming events found.') // If no events are found
+          console.log('No upcoming events found.')
         }
       }
     }
   )
 }
-listCalendarEvents()
+
+listCalendarEvents(now, oneWeekLater)
