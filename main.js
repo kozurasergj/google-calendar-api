@@ -26,45 +26,27 @@ const auth = new google.auth.GoogleAuth({
   scopes: SCOPES,
 })
 
-const calendarEvent = {
-  summary: 'Test Event added by Node.js',
-  description: 'This event was created by Node.js',
-  start: {
-    dateTime: '2022-06-03T09:00:00-02:00',
-    timeZone: 'Asia/Kolkata',
-  },
-  end: {
-    dateTime: '2022-06-04T17:00:00-02:00',
-    timeZone: 'Asia/Kolkata',
-  },
-  attendees: [],
-  reminders: {
-    useDefault: false,
-    overrides: [
-      { method: 'email', minutes: 24 * 60 },
-      { method: 'popup', minutes: 10 },
-    ],
-  },
-}
-
-const addCalendarEvent = async () => {
-  auth.getClient().then((auth) => {
-    calendar.events.insert(
-      {
-        auth: auth,
-        calendarId: GOOGLE_CALENDAR_ID,
-        resource: calendarEvent,
-      },
-      function (error, response) {
-        if (error) {
-          console.log('Something went wrong: ' + err) // If there is an error, log it to the console
-          return
+const listCalendarEvents = () => {
+  calendar.events.list(
+    {
+      auth: auth,
+      calendarId: GOOGLE_CALENDAR_ID,
+      timeMin: new Date().toISOString(),
+      maxResults: 10,
+      singleEvents: true,
+      orderBy: 'startTime',
+    },
+    (error, result) => {
+      if (error) {
+        console.log('Something went wrong: ', error) // If there is an error, log it to the console
+      } else {
+        if (result.data.items.length > 0) {
+          console.log('List of upcoming events: ', result.data.items) // If there are events, print them out
+        } else {
+          console.log('No upcoming events found.') // If no events are found
         }
-        console.log('Event created successfully.')
-        console.log('Event details: ', response.data) // Log the event details
       }
-    )
-  })
+    }
+  )
 }
-
-addCalendarEvent()
+listCalendarEvents()
